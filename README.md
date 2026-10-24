@@ -92,6 +92,13 @@ The plugin registers hooks on six ZCode events:
 | `PostToolUseFailure` | Counts command failures reported through the failure event |
 | `Stop` | Enforces the mandatory final review with hash verification, forces continuation when missing |
 
+## Side Effects and Dependencies
+
+- Runtime requirement: a `node` executable on the PATH. Six lifecycle hooks run a small Node script (10 second timeout each); they read a JSON payload on stdin and write state under the ZCode plugin data directory.
+- File writes: per-session state files and an error log inside the plugin data directory only. The hooks never write into project files.
+- Command execution: the `advisor-reviewer` agent may run read-only verification commands such as `git status` and `git diff`; the `flash-executor` agent runs the commands needed by its task.
+- Model and service dependencies: uses the ZCode session model and one pinned frontier model resolved through the user's own configured Z.ai account. No other network access, no MCP servers, no third-party code, assets, or services.
+
 ## Repository Structure
 
 - `marketplace.json`: marketplace catalog for ZCode.
