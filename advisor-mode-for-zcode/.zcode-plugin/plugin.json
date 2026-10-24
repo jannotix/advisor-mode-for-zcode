@@ -18,5 +18,9 @@
     "minimalist-engineering"
   ],
   "skills": "./skills",
-  "hooks": "./hooks/hooks.json"
+  "hooks": "./hooks/hooks.json",
+  "description_i18n": {
+    "en": "Dual-tier advisor and executor workflow for ZCode with hard lifecycle gates, minimalist engineering, clean prose, and action-first ergonomics.",
+    "zh-CN": "面向 ZCode 的双层工程工作流:前沿顾问负责审阅,跟随会话模型的快速执行者负责实施,并以硬性生命周期门禁、极简工程、洁净文风与行动优先工效加以约束。"
+  }
 }
