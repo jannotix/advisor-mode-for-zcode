@@ -1,0 +1,19 @@
+{
+  "name": "advisor-mode-for-zcode-market",
+  "version": "0.1.0",
+  "description": "Advisor Mode for Zcode: dual-tier advisor and executor workflow with hard lifecycle gates.",
+  "owner": {
+    "name": "Gianluca Iannotta",
+    "url": "https://github.com/jannotix"
+  },
+  "plugins": [
+    {
+      "name": "advisor-mode-for-zcode",
+      "source": "./advisor-mode-for-zcode",
+      "version": "0.1.0",
+      "description": "Dual-tier advisor and executor workflow for ZCode with hard lifecycle gates, minimalist engineering, clean prose, and action-first ergonomics.",
+      "displayName": "Advisor Mode for Zcode",
+      "category": "productivity"
+    }
+  ]
+}
