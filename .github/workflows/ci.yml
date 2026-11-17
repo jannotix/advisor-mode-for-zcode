@@ -1,0 +1,71 @@
+name: ci
+
+on:
+  pull_request:
+    # edited: the review-gate reads the body, so a corrected body must rerun it
+    types: [opened, synchronize, reopened, edited]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - run: node --test advisor-mode-for-zcode/tests/
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: No linter in this repository
+        run: echo "::notice::This repository has no linter. The check only verifies that every .mjs file parses (node --check)."
+      - run: find . -name '*.mjs' -not -path './node_modules/*' -not -path './.git/*' -print0 | xargs -0 -n1 node --check
+
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: No static analyser in this repository
+        run: echo "::notice::This repository has no static analyser. The check only verifies that the manifests are valid JSON and that the hook scripts they name exist."
+      - run: node .github/scripts/static.mjs
+
+  secrets:
+    runs-on: ubuntu-latest
+    # The action lists the pull request's commits through the API.
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  review-gate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: The pull request carries the verdict and the proof
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          # The verdict is a line of its own; a body that also carries a RESPINTO line fails.
+          body=$(printf '%s\n' "$BODY" | tr -d '\r')
+          printf '%s\n' "$body" | grep -qx 'APPROVATO' || { echo "The body has no APPROVATO verdict line."; exit 1; }
+          if printf '%s\n' "$body" | grep -qx 'RESPINTO'; then echo "The body carries a RESPINTO verdict line."; exit 1; fi
+          printf '%s\n' "$body" | grep -q '^## Prova' || { echo "The body has no '## Prova' section."; exit 1; }
